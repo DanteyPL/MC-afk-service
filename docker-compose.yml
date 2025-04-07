@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  backend: 
+    hostname: backend
+    env_file:
+      - .backend.env
+    build: 
+      context: ./backend
+    ports:
+      - "8000:8000"
+    environment:
+      - MC_SERVER=localhost
+      - MC_PORT=25565
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_NAME=afk_client
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+    # volumes:
+    #   - ./backend:/app
+    depends_on:
+      - db
+
+  frontend:
+    hostname: frontend
+    build:
+      context: ./frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://ubuntu-vm.local:8000
+    depends_on:
+      - backend
+
+  db:
+    hostname: db
+    image: postgres:13
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=afk_client
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+
+volumes:
+  postgres_data:
+  mc_data:
+
+networks:
+  afk_network:
+    driver: bridge
